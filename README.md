@@ -78,7 +78,37 @@ public interface PagingAndSortingRepository<T, ID> extends CrudRepository<T, ID>
 }
 ```
 
-CRUD 기능은 <code>CrudRepository</code> 인터페이스에 정의 되어 있다. 
+CRUD 기능은 <code>CrudRepository</code> 인터페이스에 정의 되어 있다.
+
+## 쿼리 메서드
+
+### 메서드 이름으로 쿼리 생성
+인터페이스에 <code>findByUsernameAndAgeGreaterThan</code> 이름으로 메서드를 정의한다. 메서드 이름은 SQL에서 사용 했던 익숙한 키워드(And, Between, LessThan 등)을 이용해서 조건문을 표현하도록 작성한다. 쿼리 메서드가 가능한 이유는 스프링 데이터 JPA가 인터페이스에 정의된 메서드 이름을 분석해서 JPQL을 생성하기 때문이다. 
+
+```
+public interface MemberRepository extends JpaRepository<Member, Long> {
+
+    List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
+
+}
+```
+
+실제 실행되는 SQL 문은 다음과 같다. 메서드 이름에 사용된 <code>Username</code>, <code>And</code>, <code>AgeGreaterThan</code> 키워드가 SQL 문의 필터 조건인 <code>member0_.username=? and member0_.age>?</code>으로 표현된다.
+
+```sql
+select
+    member0_.member_id as member_i1_0_,
+    member0_.age as age2_0_,
+    member0_.team_id as team_id4_0_,
+    member0_.username as username3_0_ 
+from
+    member member0_ 
+where
+    member0_.username=? 
+    and member0_.age>?
+```
+
+> 메서드 이름을 쿼리를 생성하는 기능은 간단한 쿼리를 작성할 때 편하지만 복잡한 쿼리를 정의하기에는 불편한 점이 있다.그리고 엔티티의 필드명이 변경되면 인터페이스에 정의한 메서드 이름도 같이 변경해줘야 한다. 
 
 ## References
 - [Spring Data JPA Docs](https://docs.spring.io/spring-data/jpa/docs/2.2.4.RELEASE/reference/html/#reference)
